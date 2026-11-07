@@ -77,8 +77,8 @@ volta para o próprio tema e as próprias fontes.
 
 Tudo está no `plugin.json`: copie este repositório, troque o `id` (e o nome da pasta),
 e mexa no que quiser. A referência completa de cada campo está no guia de plugins do
-Panorama: [português](https://github.com/Frenvius/panorama-term/blob/main/docs/PLUGINS.pt-BR.md)
-· [English](https://github.com/Frenvius/panorama-term/blob/main/docs/PLUGINS.md).
+Panorama: [português](https://github.com/FlavioDias97/panorama-term/blob/plugins/docs/PLUGINS.pt-BR.md)
+· [English](https://github.com/FlavioDias97/panorama-term/blob/plugins/docs/PLUGINS.md).
 
 ```
 gatinhos/
