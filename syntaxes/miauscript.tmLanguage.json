@@ -1,0 +1,63 @@
+{
+  "name": "MiauScript",
+  "scopeName": "source.miauscript",
+  "patterns": [
+    { "include": "#comment" },
+    { "include": "#string" },
+    { "include": "#face" },
+    { "include": "#function" },
+    { "include": "#keyword" },
+    { "include": "#constant" },
+    { "include": "#number" },
+    { "include": "#operator" }
+  ],
+  "repository": {
+    "comment": {
+      "patterns": [
+        { "match": "//.*$", "name": "comment.line.double-slash.miauscript" },
+        { "begin": "/\\*", "end": "\\*/", "name": "comment.block.miauscript" }
+      ]
+    },
+    "string": {
+      "begin": "\"",
+      "end": "\"",
+      "name": "string.quoted.double.miauscript",
+      "patterns": [
+        { "match": "\\\\.", "name": "constant.character.escape.miauscript" },
+        {
+          "begin": "\\{",
+          "end": "\\}",
+          "name": "string.interpolated.miauscript",
+          "patterns": [{ "match": "[A-Za-z_][A-Za-z0-9_]*", "name": "variable.other.miauscript" }]
+        }
+      ]
+    },
+    "face": {
+      "match": "=\\^[.oO_-]\\^=",
+      "name": "constant.other.face.miauscript"
+    },
+    "function": {
+      "match": "\\b(miau)\\s+([A-Za-z_][A-Za-z0-9_]*)",
+      "captures": {
+        "1": { "name": "keyword.control.miauscript" },
+        "2": { "name": "entity.name.function.miauscript" }
+      }
+    },
+    "keyword": {
+      "match": "\\b(miau|ronrom|se|senao|enquanto|devolve|arranha|soneca|pula|caixa)\\b",
+      "name": "keyword.control.miauscript"
+    },
+    "constant": {
+      "match": "\\b(sim|nao|nada|novelo)\\b",
+      "name": "constant.language.miauscript"
+    },
+    "number": {
+      "match": "\\b[0-9]+(\\.[0-9]+)?\\b",
+      "name": "constant.numeric.miauscript"
+    },
+    "operator": {
+      "match": "==|!=|<=|>=|=|\\+|-|\\*|/",
+      "name": "keyword.operator.miauscript"
+    }
+  }
+}

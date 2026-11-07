@@ -1,0 +1,21 @@
+// MiauScript: a linguagem dos gatinhos =^.^=
+/* abra com o tema Gatinhos e a fonte Comic Mono ligados */
+
+miau acordar(gato, fome) {
+  ronrom petiscos = fome * 2
+  se (gato == "laranja") {
+    devolve "Miau, {gato}! Cadê o sachê?"
+  } senao {
+    devolve novelo
+  }
+}
+
+miau dia_de_gato() {
+  ronrom sonecas = 16
+  enquanto (sim) {
+    acordar("laranja", 3)
+    soneca
+    se (sonecas == 0) { arranha }
+  }
+  devolve nada
+}
