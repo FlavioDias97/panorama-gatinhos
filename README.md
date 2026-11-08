@@ -79,7 +79,10 @@ git clone https://github.com/FlavioDias97/panorama-gatinhos "$env:APPDATA\panora
 Sem git: baixe o ZIP (botão **Code → Download ZIP**), extraia na pasta de plugins e
 renomeie a pasta extraída de `panorama-gatinhos-main` para `gatinhos`.
 
-O plugin aparece na hora em **Settings → Plugins**, sem reiniciar. Se você roda o
+O plugin aparece na hora em **Settings → Plugins**, sem reiniciar.
+
+![Settings → Plugins com o Gatinhos instalado](prints/settings-plugins.png)
+ Se você roda o
 Panorama a partir do código (`bun run dev`), troque `panorama` por `panorama-dev` no
 caminho.
 
@@ -111,6 +114,11 @@ Tudo está no `plugin.json`: copie este repositório, troque o `id` (e o nome da
 e mexa no que quiser. A referência completa de cada campo está no guia de plugins do
 Panorama: [português](https://github.com/FlavioDias97/panorama-term/blob/plugins/docs/PLUGINS.pt-BR.md)
 · [English](https://github.com/FlavioDias97/panorama-term/blob/plugins/docs/PLUGINS.md).
+
+Se o `plugin.json` tiver algum erro, o Panorama mostra o plugin em **Settings →
+Plugins** com o motivo, na hora em que você salva:
+
+![Plugin com manifesto inválido e o motivo](prints/plugin-invalido.png)
 
 ```
 gatinhos/
