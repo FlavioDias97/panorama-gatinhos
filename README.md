@@ -4,9 +4,12 @@ Um plugin para o [Panorama](https://github.com/Frenvius/panorama-term) que usa t
 pontos de extensão de plugins declarativos de uma vez. Serve para deixar o Panorama com
 cara de gato e como modelo para quem quer fazer o próprio plugin.
 
-*English: a Panorama plugin with two cat themes, two fonts, a made-up language with its
-own grammar and an extension mapping. Install it by cloning this repository into
-Panorama's plugins folder as `gatinhos` (commands below).*
+*English: a Panorama plugin with two cat themes (with cats walking behind the
+terminals), two fonts, a made-up language with its own grammar and an extension mapping.
+Install it by cloning this repository into Panorama's plugins folder as `gatinhos`
+(commands below).*
+
+![Gatinho Preto Dark: gatinhos andando atrás de um terminal transparente](prints/tema-escuro.png)
 
 ## O que vem
 
@@ -23,11 +26,32 @@ Panorama's plugins folder as `gatinhos` (commands below).*
 Os temas mudam as cores do app, do código e as 16 cores ANSI do terminal, deixam os
 terminais um pouco transparentes e sem desfoque, para os gatinhos aparecerem atrás.
 
+| Gatinho Laranja Light | MiauScript no editor |
+| --- | --- |
+| ![Tema claro](prints/tema-claro.png) | ![gato.miau colorido](prints/editor-miauscript.png) |
+| **`kitty.conf` como INI** | **Settings → Appearance** |
+| ![kitty.conf colorido](prints/editor-kitty-conf.png) | ![Temas e fontes escolhidos](prints/configuracoes.png) |
+
 > **Aviso de desempenho:** o fundo animado é um SVG, e o motor web do Panorama redesenha
 > a imagem inteira a cada quadro enquanto ela aparece. Num notebook comum isso ocupa
 > perto de um núcleo da CPU (medido no Linux). O custo é só deste tema: escolha outro
 > tema (ou ative "reduzir movimento" no sistema) e ele some. O fundo também some quando
 > um terminal está em tela cheia.
+
+## Requisitos
+
+O suporte a plugins (temas, fontes, linguagens e fundo do canvas) foi
+[proposto ao Panorama](https://github.com/FlavioDias97/panorama-term/tree/plugins) e ainda
+não está numa versão lançada. Até lá, rode o Panorama a partir do fork:
+
+```sh
+git clone -b plugins https://github.com/FlavioDias97/panorama-term
+cd panorama-term && bun install && bun run dev
+```
+
+(precisa de Rust, [bun](https://bun.sh) e das
+[dependências do Tauri](https://v2.tauri.app/start/prerequisites/)). Nessa versão de
+desenvolvimento a pasta de plugins é a `panorama-dev` (veja abaixo).
 
 ## Instalar
 
@@ -94,6 +118,7 @@ gatinhos/
 ├── fonts/                              Comic Mono e Fredoka, com as licenças
 ├── syntaxes/miauscript.tmLanguage.json gramática TextMate do MiauScript
 ├── fundo/                              os gatinhos animados (SVG) e o gerar.py que os cria
+├── prints/                             as imagens deste README
 └── exemplos/                           gato.miau e kitty.conf
 ```
 
