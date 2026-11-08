@@ -1,0 +1,85 @@
+"""Gera fundo/gatinhos-noite.svg e fundo/gatinhos-dia.svg (só SVG + CSS, sem script)."""
+import sys
+
+def svg(c):
+    return f'''<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+<style>
+  .leg {{ transform-box: fill-box; transform-origin: 50% 0; animation: step .42s ease-in-out infinite alternate; }}
+  .leg.b {{ animation-delay: -.42s; }}
+  .tail {{ transform-box: fill-box; transform-origin: 100% 100%; animation: wag 1.1s ease-in-out infinite alternate; }}
+  .blink {{ transform-box: fill-box; transform-origin: 50% 50%; animation: blink 5s infinite; }}
+  .walk1 {{ animation: walk1 42s linear infinite; }}
+  .walk2 {{ animation: walk2 57s linear infinite; animation-delay: -21s; }}
+  .walk3 {{ animation: walk3 71s linear infinite; animation-delay: -45s; }}
+  .chase {{ animation: chase 29s linear infinite; animation-delay: -9s; }}
+  .ball {{ transform-box: fill-box; transform-origin: 50% 50%; animation: roll .9s linear infinite; }}
+  .breathe {{ transform-box: fill-box; transform-origin: 50% 100%; animation: breathe 3.2s ease-in-out infinite; }}
+  .z {{ animation: z 4.5s ease-out infinite; opacity: 0; }}
+  .z2 {{ animation-delay: 1.5s; }} .z3 {{ animation-delay: 3s; }}
+  @keyframes step {{ from {{ transform: rotate(-22deg); }} to {{ transform: rotate(22deg); }} }}
+  @keyframes wag {{ from {{ transform: rotate(-10deg); }} to {{ transform: rotate(14deg); }} }}
+  @keyframes blink {{ 0%, 94%, 100% {{ transform: scaleY(1); }} 97% {{ transform: scaleY(.1); }} }}
+  @keyframes walk1 {{ from {{ transform: translate(-260px, 690px); }} to {{ transform: translate(1860px, 690px); }} }}
+  @keyframes walk2 {{ from {{ transform: translate(1820px, 520px); }} to {{ transform: translate(-220px, 520px); }} }}
+  @keyframes walk3 {{
+    0% {{ transform: translate(-300px, 800px); }}
+    38% {{ transform: translate(620px, 800px); }}
+    52% {{ transform: translate(620px, 800px); }}
+    100% {{ transform: translate(1900px, 800px); }}
+  }}
+  @keyframes chase {{ from {{ transform: translate(1800px, 610px); }} to {{ transform: translate(-400px, 610px); }} }}
+  @keyframes roll {{ to {{ transform: rotate(-360deg); }} }}
+  @keyframes breathe {{ 0%, 100% {{ transform: scale(1, 1); }} 50% {{ transform: scale(1.03, 1.06); }} }}
+  @keyframes z {{ 0% {{ opacity: 0; transform: translate(0, 0) scale(.6); }} 20% {{ opacity: 1; }} 100% {{ opacity: 0; transform: translate(30px, -70px) scale(1.2); }} }}
+</style>
+<defs>
+  <g id="cat">
+    <path class="tail" d="M26 46 C 8 44, 2 26, 12 12" fill="none" stroke="{c['fur']}" stroke-width="7" stroke-linecap="round"/>
+    <rect class="leg b" x="34" y="56" width="8" height="20" rx="4" fill="{c['fur']}"/>
+    <rect class="leg" x="46" y="56" width="8" height="20" rx="4" fill="{c['fur']}"/>
+    <rect class="leg" x="70" y="56" width="8" height="20" rx="4" fill="{c['fur']}"/>
+    <rect class="leg b" x="82" y="56" width="8" height="20" rx="4" fill="{c['fur']}"/>
+    <ellipse cx="60" cy="48" rx="36" ry="18" fill="{c['fur']}"/>
+    <path d="M44 34 q4 10 0 22 M56 31 q4 12 0 26 M68 32 q4 10 0 22" stroke="{c['stripe']}" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <circle cx="96" cy="32" r="17" fill="{c['fur']}"/>
+    <path d="M84 22 L86 4 L97 17 Z M99 17 L110 4 L110 24 Z" fill="{c['fur']}"/>
+    <path d="M87 18 L88 9 L94 16 Z M102 16 L107 9 L107 20 Z" fill="{c['ear']}"/>
+    <g class="blink"><ellipse cx="91" cy="30" rx="2.6" ry="3.6" fill="{c['eye']}"/><ellipse cx="103" cy="30" rx="2.6" ry="3.6" fill="{c['eye']}"/></g>
+    <path d="M96 36 l-3 -3 h6 z" fill="{c['nose']}"/>
+    <path d="M109 37 h12 M109 40 l11 3" stroke="{c['whisker']}" stroke-width="1.4" stroke-linecap="round"/>
+  </g>
+  <g id="yarn">
+    <circle r="15" fill="{c['yarn']}"/>
+    <path d="M-12 -6 q12 8 24 0 M-13 4 q13 -9 26 0 M-6 -13 q8 13 0 26" stroke="{c['yarnLine']}" stroke-width="2" fill="none"/>
+  </g>
+</defs>
+<g opacity=".95">
+  <g class="walk1"><use xlink:href="#cat"/></g>
+  <g class="walk2"><g transform="scale(-.7, .7)"><use xlink:href="#cat"/></g></g>
+  <g class="walk3"><g transform="scale(1.15)"><use xlink:href="#cat"/></g></g>
+  <g class="chase">
+    <g transform="translate(0, 58)"><g class="ball"><use xlink:href="#yarn"/></g></g>
+    <path d="M14 58 C 60 70, 90 40, 150 64" stroke="{c['yarn']}" stroke-width="2" fill="none"/>
+    <g transform="translate(130, 18) scale(-.55, .55)"><use xlink:href="#cat"/></g>
+  </g>
+  <g transform="translate(1250, 250)">
+    <g class="breathe">
+      <ellipse cx="60" cy="40" rx="58" ry="26" fill="{c['fur']}"/>
+      <path d="M10 52 C 30 74, 100 74, 116 46" stroke="{c['fur']}" stroke-width="12" fill="none" stroke-linecap="round"/>
+      <circle cx="98" cy="30" r="20" fill="{c['fur']}"/>
+      <path d="M84 20 L88 2 L98 15 Z M102 14 L114 2 L114 24 Z" fill="{c['fur']}"/>
+      <path d="M90 31 q4 3 8 0 M103 31 q4 3 8 0" stroke="{c['eye']}" stroke-width="2" fill="none" stroke-linecap="round"/>
+    </g>
+    <text class="z" x="120" y="0" font-family="sans-serif" font-size="22" font-weight="700" fill="{c['eye']}">z</text>
+    <text class="z z2" x="128" y="-6" font-family="sans-serif" font-size="18" font-weight="700" fill="{c['eye']}">z</text>
+    <text class="z z3" x="136" y="-12" font-family="sans-serif" font-size="14" font-weight="700" fill="{c['eye']}">z</text>
+  </g>
+</g>
+</svg>
+'''
+
+noite = dict(fur='#3b3347', stripe='#4a4158', ear='#ff8fb1', eye='#ffb000', nose='#ff8fb1', whisker='#5a5068', yarn='#ff8fb1', yarnLine='#c2577a')
+dia = dict(fur='#f2a65a', stripe='#e0893a', ear='#ffc7d6', eye='#4a2c17', nose='#d6336c', whisker='#b0937b', yarn='#8ec5ff', yarnLine='#4a7fd6')
+out = sys.argv[1]
+open(f'{out}/gatinhos-noite.svg', 'w').write(svg(noite))
+open(f'{out}/gatinhos-dia.svg', 'w').write(svg(dia))

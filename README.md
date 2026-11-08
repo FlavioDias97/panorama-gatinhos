@@ -18,8 +18,16 @@ Panorama's plugins folder as `gatinhos` (commands below).*
 | Fonte (interface) | **Fredoka**, redonda e fofa |
 | Linguagem nova | **MiauScript** (`.miau`), com gramática própria em `syntaxes/` |
 | Extensão associada | `.conf` colorido como **INI** (pense no `kitty.conf`) |
+| Fundo animado | gatinhos andando, um filhote correndo atrás do novelo e um gato dormindo, atrás dos terminais |
 
-Os temas mudam as cores do app, do código e as 16 cores ANSI do terminal.
+Os temas mudam as cores do app, do código e as 16 cores ANSI do terminal, deixam os
+terminais um pouco transparentes e sem desfoque, para os gatinhos aparecerem atrás.
+
+> **Aviso de desempenho:** o fundo animado é um SVG, e o motor web do Panorama redesenha
+> a imagem inteira a cada quadro enquanto ela aparece. Num notebook comum isso ocupa
+> perto de um núcleo da CPU (medido no Linux). O custo é só deste tema: escolha outro
+> tema (ou ative "reduzir movimento" no sistema) e ele some. O fundo também some quando
+> um terminal está em tela cheia.
 
 ## Instalar
 
@@ -85,6 +93,7 @@ gatinhos/
 ├── plugin.json                         manifesto: temas, fontes e linguagens
 ├── fonts/                              Comic Mono e Fredoka, com as licenças
 ├── syntaxes/miauscript.tmLanguage.json gramática TextMate do MiauScript
+├── fundo/                              os gatinhos animados (SVG) e o gerar.py que os cria
 └── exemplos/                           gato.miau e kitty.conf
 ```
 
