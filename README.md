@@ -40,12 +40,12 @@ terminais um pouco transparentes e sem desfoque, para os gatinhos aparecerem atr
 
 ## Requisitos
 
-O suporte a plugins (temas, fontes, linguagens e fundo do canvas) foi
-[proposto ao Panorama](https://github.com/FlavioDias97/panorama-term/tree/plugins) e ainda
-não está numa versão lançada. Até lá, rode o Panorama a partir do fork:
+O suporte a plugins (temas, fontes, linguagens e fundo do canvas)
+[entrou no Panorama](https://github.com/Frenvius/panorama-term/pull/6) depois da
+v0.2.19. Até sair a próxima versão, rode o Panorama a partir do código:
 
 ```sh
-git clone -b plugins https://github.com/FlavioDias97/panorama-term
+git clone https://github.com/Frenvius/panorama-term
 cd panorama-term && bun install && bun run dev
 ```
 
@@ -81,10 +81,10 @@ renomeie a pasta extraída de `panorama-gatinhos-main` para `gatinhos`.
 
 O plugin aparece na hora em **Settings → Plugins**, sem reiniciar.
 
+Se você roda o Panorama a partir do código (`bun run dev`), troque `panorama` por
+`panorama-dev` no caminho.
+
 ![Settings → Plugins com o Gatinhos instalado](prints/settings-plugins.png)
- Se você roda o
-Panorama a partir do código (`bun run dev`), troque `panorama` por `panorama-dev` no
-caminho.
 
 ## Usar
 
@@ -112,8 +112,8 @@ volta para o próprio tema e as próprias fontes.
 
 Tudo está no `plugin.json`: copie este repositório, troque o `id` (e o nome da pasta),
 e mexa no que quiser. A referência completa de cada campo está no guia de plugins do
-Panorama: [português](https://github.com/FlavioDias97/panorama-term/blob/plugins/docs/PLUGINS.pt-BR.md)
-· [English](https://github.com/FlavioDias97/panorama-term/blob/plugins/docs/PLUGINS.md).
+Panorama: [português](https://github.com/Frenvius/panorama-term/blob/main/docs/PLUGINS.pt-BR.md)
+· [English](https://github.com/Frenvius/panorama-term/blob/main/docs/PLUGINS.md).
 
 Se o `plugin.json` tiver algum erro, o Panorama mostra o plugin em **Settings →
 Plugins** com o motivo, na hora em que você salva:
