@@ -9,6 +9,7 @@ fundo na hora. Só SVG + CSS, sem script.
 """
 import json
 import os
+import random
 import re
 import sys
 import unicodedata
@@ -23,11 +24,13 @@ TEMAS = {
     'noite': dict(fundo='#121015', preto='#3b3347', branco='#ece6f2', nome='#ece6f2',
                   contorno='#8a7f9a', novelo='#ff8fb1', noveloLinha='#c2577a', z='#ffb000',
                   casa='#4a3f5c', telhado='#ff8fb1', porta='#1c1822', madeira='#6b5a7d',
-                  corda='#c9b79c', pote='#8ec5ff', racao='#b0763a'),
+                  corda='#c9b79c', pote='#8ec5ff', racao='#b0763a', almofada='#7a5f9e',
+                  almofadaBorda='#5a4578'),
     'dia': dict(fundo='#fff6e9', preto='#2e2830', branco='#ffffff', nome='#4a2c17',
                 contorno='#c9a98a', novelo='#8ec5ff', noveloLinha='#4a7fd6', z='#4a2c17',
                 casa='#f0c9a0', telhado='#e8743b', porta='#4a2c17', madeira='#c9925e',
-                corda='#e9d8b4', pote='#6fb7ff', racao='#8a5a2b'),
+                corda='#e9d8b4', pote='#6fb7ff', racao='#8a5a2b', almofada='#f4b6c2',
+                almofadaBorda='#e08aa0'),
 }
 
 # --- Raças -------------------------------------------------------------------------------
@@ -61,23 +64,22 @@ APELIDOS_RACA = {
     'tigrado': 'rajado', 'tigrada': 'rajado', 'calico': 'tricolor', 'tartaruga': 'escaminha',
 }
 
+# Todo gato faz de tudo um pouco; "faz" é do que ele mais gosta.
 ATIVIDADES = {
-    'andando': 'atravessa a tela',
-    'brincando': 'corre atrás do novelo',
-    'dormindo': 'dorme num canto',
-    'sentado': 'fica sentado olhando',
-    'lambendo': 'toma banho',
+    'andando': 'vive passeando, sai e volta pela tela',
+    'brincando': 'vive brincando com o novelo e correndo',
+    'dormindo': 'cochila muito na almofada',
+    'sentado': 'senta e fica olhando',
+    'lambendo': 'se lambe o tempo todo',
     'caseiro': 'dorme na casinha e sai para comer',
-    'explorador': 'passeia, afia as unhas no arranhador e come',
-    'brincalhao': 'corre atrás do novelo e tira uma soneca',
 }
-# rotina -> objetos de cenário que ela usa
-ROTINAS = {'caseiro': ['casinha', 'pote'], 'explorador': ['arranhador', 'pote'], 'brincalhao': []}
 APELIDOS_ATIVIDADE = {
-    'andar': 'andando', 'passeando': 'andando', 'brincar': 'brincando', 'correndo': 'brincando',
-    'dormir': 'dormindo', 'sentar': 'sentado', 'sentada': 'sentado', 'lamber': 'lambendo',
-    'se lambendo': 'lambendo', 'tomando banho': 'lambendo', 'caseira': 'caseiro',
-    'exploradora': 'explorador', 'brincalhona': 'brincalhao',
+    'andar': 'andando', 'passeando': 'andando', 'passeador': 'andando', 'passeadora': 'andando',
+    'explorador': 'andando', 'exploradora': 'andando', 'brincar': 'brincando',
+    'correndo': 'brincando', 'brincalhao': 'brincando', 'brincalhona': 'brincando',
+    'dormir': 'dormindo', 'dorminhoco': 'dormindo', 'dorminhoca': 'dormindo',
+    'sentar': 'sentado', 'sentada': 'sentado', 'lamber': 'lambendo', 'se lambendo': 'lambendo',
+    'tomando banho': 'lambendo', 'caseira': 'caseiro',
 }
 
 # chave em "cores" no gatos.json -> parte do desenho
@@ -244,7 +246,7 @@ def andando(uid, p, comendo=False):
     return svg, 125, 76, 96, 4
 
 
-def sentado(uid, p, lambendo=False, arranhando=False):
+def sentado(uid, p, lambendo=False, arranhando=False, brincando=False):
     quadril = '<ellipse cx="40" cy="78" rx="26" ry="20"/>'
     peito = '<ellipse cx="62" cy="62" rx="20" ry="30"/>'
     pe = f'<ellipse cx="48" cy="95" rx="13" ry="4" fill="{p["patas"]}"{tracado(p)}/>'
@@ -259,6 +261,12 @@ def sentado(uid, p, lambendo=False, arranhando=False):
             f'{perna(x, 36, 32, p, pata_em_cima=True)}</g></g>'
             for x, ang, b in ((62, 60, ''), (70, 48, ' b')))
         cab = cabeca(uid, 68, 28, 17, p)
+    elif brincando:
+        # uma pata da frente esticada para o novelo, que fica logo à direita, dando tapinhas
+        frente = (perna(58, 66, 32, p) +
+                  f'<g transform="translate(74 64)"><g class="bat"><g transform="rotate(-62)">'
+                  f'{perna(-4, -2, 30, p)}</g></g></g>')
+        cab = cabeca(uid, 72, 34, 17, p)
     else:
         frente = perna(58, 66, 32, p) + perna(70, 66, 32, p)
         cab = cabeca(uid, 68, 28, 17, p)
@@ -298,53 +306,34 @@ def dormindo(uid, p):
 
 # --- Cena --------------------------------------------------------------------------------
 
-CSS = '''
+CSS = """
   .leg { transform-box: fill-box; transform-origin: 50% 0; animation: step .42s ease-in-out infinite alternate; }
   .leg.b { animation-delay: -.42s; }
-  .run .leg { animation-duration: .26s; } .run .leg.b { animation-delay: -.26s; }
+  .run .leg { animation-duration: .2s; } .run .leg.b { animation-delay: -.2s; }
   .tail { transform-box: fill-box; transform-origin: 100% 100%; animation: wag 1.1s ease-in-out infinite alternate; }
   .tail.slow { transform-origin: 100% 100%; animation-duration: 2.6s; }
   .blink { transform-box: fill-box; transform-origin: 50% 50%; animation: blink 5s infinite; }
-  .ball { transform-box: fill-box; transform-origin: 50% 50%; animation: roll .9s linear infinite; }
   .breathe { transform-box: fill-box; transform-origin: 50% 100%; animation: breathe 3.2s ease-in-out infinite; }
   .lick-head { transform-box: fill-box; transform-origin: 30% 100%; animation: lick .55s ease-in-out infinite alternate; }
   .lick-paw { animation: paw .55s ease-in-out infinite alternate; }
   .eat { animation: eat .4s ease-in-out infinite alternate; }
   .scratch { animation: scratch .3s ease-in-out infinite alternate; }
   .scratch.b { animation-delay: -.3s; }
+  .bat { animation: bat .45s ease-in-out infinite alternate; }
   .z { animation: z 4.5s ease-out infinite; opacity: 0; }
   .z2 { animation-delay: 1.5s; } .z3 { animation-delay: 3s; }
   @keyframes step { from { transform: rotate(-22deg); } to { transform: rotate(22deg); } }
   @keyframes wag { from { transform: rotate(-10deg); } to { transform: rotate(14deg); } }
   @keyframes blink { 0%, 94%, 100% { transform: scaleY(1); } 97% { transform: scaleY(.1); } }
-  @keyframes roll { to { transform: rotate(-360deg); } }
   @keyframes breathe { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.03, 1.06); } }
   @keyframes lick { from { transform: rotate(4deg); } to { transform: rotate(14deg); } }
   @keyframes eat { to { transform: translate(0, 3px); } }
   @keyframes scratch { to { transform: translate(-3px, 7px); } }
+  @keyframes bat { from { transform: rotate(14deg); } to { transform: rotate(-18deg); } }
   @keyframes paw { from { transform: translate(0, 0); } to { transform: translate(0, -4px); } }
   @keyframes z { 0% { opacity: 0; transform: translate(0, 0) scale(.6); } 20% { opacity: 1; } 100% { opacity: 0; transform: translate(30px, -70px) scale(1.2); } }
   .nome { font: 700 15px Fredoka, "Comic Sans MS", "Comic Neue", sans-serif; text-anchor: middle; paint-order: stroke; stroke-width: 4px; stroke-linejoin: round; }
-'''
-
-FAIXAS_ANDAR = [690, 520, 760, 600, 450, 730, 560]
-FAIXAS_BRINCAR = [610, 400, 700, 480]
-DURACOES = [42, 57, 71, 49, 64, 53]
-LUGARES = [(1300, 330), (300, 420), (830, 300), (1430, 600), (560, 480), (1080, 470), (150, 250),
-           (700, 640), (1200, 720)]
-
-
-def perspectiva(y):
-    """Quem está mais embaixo na tela parece mais perto, e fica maior."""
-    return 0.7 + 0.45 * (y - 440) / 360
-
-
-def colocar(svg, larg, chao_pose, x, chao, s, virado):
-    """Põe a pose com os pés em (x, chao); virado = olhando para a esquerda."""
-    y = chao - chao_pose * s
-    if virado:
-        return f'<g transform="translate({x + larg * s:.1f} {y:.1f}) scale({-s:.3f} {s:.3f})">{svg}</g>'
-    return f'<g transform="translate({x:.1f} {y:.1f}) scale({s:.3f})">{svg}</g>'
+"""
 
 
 def rotulo(nome, x, y, tema):
@@ -363,30 +352,12 @@ def zzz(x, y, virado, tema):
     return ''.join(partes)
 
 
-def novelo(tema, girando=True):
-    classe = ' class="ball"' if girando else ''
-    return (f'<g transform="translate(15 61)"><g{classe}><circle r="15" fill="{tema["novelo"]}"/>'
-            f'<path d="M-12 -6 q12 8 24 0 M-13 4 q13 -9 26 0 M-6 -13 q8 13 0 26" '
-            f'stroke="{tema["noveloLinha"]}" stroke-width="2" fill="none"/></g></g>')
-
-
-def corrida(uid, p, tema, s):
-    """Gato correndo atrás do novelo, virado para a esquerda, com os pés em y = 76.
-    Devolve (svg, largura, centro da cabeça em x, y do nome)."""
-    svg, larg, chao_pose, hx, topo = andando(uid, p)
-    gx = 40  # novelo na frente (x = 0..30), gato logo atrás, olhando para o novelo
-    gato = colocar(svg, larg, chao_pose, gx, 76, s, True)
-    linha = (f'<path d="M28 66 C 50 80, {gx + 20} 60, {gx + larg * s + 20:.0f} 74" '
-             f'stroke="{tema["novelo"]}" stroke-width="2" fill="none"/>')
-    return (f'<g class="run">{linha}{novelo(tema)}{gato}</g>', gx + larg * s + 40,
-            gx + (larg - hx) * s, 76 + (topo - chao_pose) * s - 8)
-
-
-# --- Cenário e rotinas -------------------------------------------------------------------
-# Os objetos ficam numa linha de chão. Cada um é desenhado com a base centrada em (0, 0).
+# --- Cenário -----------------------------------------------------------------------------
+# Os objetos ficam parados numa linha de chão. Cada um é desenhado com a base em (0, 0).
 
 CHAO = 700
-OBJETOS = {'casinha': 1290, 'pote': 820, 'arranhador': 400}  # x de cada um
+OBJETOS = {'arranhador': 300, 'novelo': 590, 'pote': 860, 'almofada': 1100, 'casinha': 1370}  # x
+ALMOFADA = 14  # altura de quem dorme em cima dela
 
 
 def objeto(nome, tema):
@@ -398,6 +369,14 @@ def objeto(nome, tema):
     elif nome == 'pote':
         svg = (f'<path d="M-26 -14 L-20 0 H20 L26 -14 Z" fill="{tema["pote"]}"/>'
                f'<ellipse cy="-14" rx="26" ry="6" fill="{tema["racao"]}"/>')
+    elif nome == 'novelo':
+        svg = (f'<path d="M10 -4 C 30 2, 44 -2, 58 2" stroke="{tema["novelo"]}" stroke-width="2" fill="none"/>'
+               f'<circle cy="-15" r="15" fill="{tema["novelo"]}"/>'
+               f'<path d="M-12 -21 q12 8 24 0 M-13 -11 q13 -9 26 0 M-6 -28 q8 13 0 26" '
+               f'stroke="{tema["noveloLinha"]}" stroke-width="2" fill="none"/>')
+    elif nome == 'almofada':
+        svg = (f'<ellipse cy="-9" rx="80" ry="12" fill="{tema["almofadaBorda"]}"/>'
+               f'<ellipse cy="-13" rx="70" ry="9" fill="{tema["almofada"]}"/>')
     else:
         svg = (f'<rect x="-34" y="-8" width="68" height="8" rx="4" fill="{tema["madeira"]}"/>'
                f'<rect x="-9" y="-122" width="18" height="114" fill="{tema["corda"]}"/>'
@@ -407,29 +386,98 @@ def objeto(nome, tema):
     return f'<g transform="translate({OBJETOS[nome]} {CHAO})">{svg}</g>'
 
 
-def passos(rotina, s):
-    """O roteiro de uma rotina: (segundos, pose, x final, virado para a esquerda).
-    Sem x o gato fica onde está; sem "virado" ele olha para onde anda. A pose None é o
-    gato fora da tela, voltando para o começo. O roteiro termina onde começa."""
-    porta, pote, poste = OBJETOS['casinha'], OBJETOS['pote'], OBJETOS['arranhador']
-    if rotina == 'caseiro':
-        return [(38, 'dentro', None, False), (11, 'andando', pote + 62 * s), (12, 'comendo'),
-                (9, 'lambendo'), (11, 'andando', porta)]
-    if rotina == 'explorador':
-        return [(13, 'andando', poste - 52 * s), (10, 'arranhando'), (10, 'andando', pote - 62 * s),
-                (11, 'comendo'), (7, 'andando', 1060), (12, 'sentado'), (17, 'andando', 1750),
-                (8, None, -150)]
-    return [(14, 'correndo', 620), (22, 'soneca'), (19, 'correndo', 1800), (7, None, -220)]
+# --- Rotinas -----------------------------------------------------------------------------
+# Todo gato faz de tudo um pouco, numa ordem que é só dele; "faz" diz do que ele mais gosta.
+
+JEITOS = {  # atividade -> quantas vezes por volta
+    'andando': dict(passear=3, sentar=1, comer=1, arranhar=1, lamber=1, brincar=1),
+    'brincando': dict(brincar=3, correr=2, comer=1, soneca=1, lamber=1),
+    'dormindo': dict(soneca=3, lamber=1, comer=1, sentar=1, brincar=1),
+    'sentado': dict(sentar=3, lamber=1, comer=1, brincar=1, passear=1),
+    'lambendo': dict(lamber=3, sentar=1, comer=1, soneca=1, arranhar=1),
+    'caseiro': dict(casinha=2, comer=1, lamber=1, sentar=1, brincar=1),
+}
+DURACAO = dict(sentar=10, lamber=9, comer=11, arranhar=9, brincar=13, soneca=26, casinha=30)
+# atividade -> (objeto, pose, distância do gato ao objeto)
+NO_OBJETO = dict(comer=('pote', 'comendo', 62), arranhar=('arranhador', 'arranhando', 52),
+                 brincar=('novelo', 'brincando', 64), soneca=('almofada', 'soneca', 0),
+                 casinha=('casinha', 'dentro', 0))
+ANDA, CORRE = 50, 190  # px por segundo
+FORA = (-170, 1770)    # x de quem saiu da tela
 
 
-def linha_do_tempo(roteiro):
+def objetos_do(faz):
+    return {NO_OBJETO[a][0] for a in JEITOS[faz] if a in NO_OBJETO}
+
+
+def ordem(contagem, rng):
+    """As atividades embaralhadas, sem repetir a mesma duas vezes seguidas (nem na volta)."""
+    lista = [a for a, n in contagem.items() for _ in range(n)]
+    for _ in range(500):
+        rng.shuffle(lista)
+        if all(lista[i] != lista[i - 1] for i in range(len(lista))):
+            break
+    return lista
+
+
+def passos(g, rng):
+    """O roteiro de um gato: (x inicial, [(segundos, pose, x final, virado), ...]).
+    Sem x final o gato fica onde está; com virado None ele olha para onde anda. A pose
+    None é o gato fora da tela, dando a volta. O roteiro termina onde começa."""
+    s = g['tamanho']
+    passo_s = s ** 0.5
+    x0 = x = rng.uniform(200, 1400)
+    lista = []
+
+    def anda(ate, pose='andando', vel=ANDA):
+        nonlocal x
+        if abs(ate - x) > 3:
+            lista.append((round(abs(ate - x) / (vel * passo_s), 1), pose, ate, None))
+            x = ate
+
+    def fica(pose, seg, virado=None):
+        lista.append((round(seg * rng.uniform(0.8, 1.25), 1), pose, None, virado))
+
+    def longe(minimo):
+        while True:
+            ate = rng.uniform(150, 1450)
+            if abs(ate - x) >= minimo:
+                return ate
+
+    for atividade in ordem(JEITOS[g['faz']], rng):
+        if atividade in NO_OBJETO:
+            nome, pose, dist = NO_OBJETO[atividade]
+            alvo = OBJETOS[nome]
+            lado = -1 if x < alvo else 1  # chega pelo lado em que já está
+            # na almofada cada gato deita num canto, para não deitarem um em cima do outro
+            canto = (g['n'] % 3 - 1) * 40 if nome == 'almofada' else 0
+            anda(alvo + lado * dist * s + canto)
+            fica(pose, DURACAO[atividade], virado=lado > 0 if dist else None)
+        elif atividade == 'sentar':
+            anda(longe(250))
+            fica('sentado', DURACAO['sentar'])
+        elif atividade == 'lamber':
+            fica('lambendo', DURACAO['lamber'])
+        elif atividade == 'correr':
+            anda(longe(500), 'correndo', CORRE)
+            fica('sentado', 4)
+        else:  # passear: sai por um lado e volta pelo outro
+            saida = rng.choice(FORA)
+            anda(saida)
+            x = FORA[0] if saida == FORA[1] else FORA[1]
+            lista.append((round(rng.uniform(4, 10), 1), None, x, None))
+    anda(x0)
+    return x0, lista
+
+
+def linha_do_tempo(x0, roteiro):
     """Vira o roteiro em quadros: (% do ciclo, x, virado, pose) no começo de cada passo."""
     total = sum(passo[0] for passo in roteiro)
-    x, virado, t, quadros = roteiro[-1][2], False, 0, []
-    for seg, pose, *resto in roteiro:
-        destino = resto[0] if resto and resto[0] is not None else x
-        if len(resto) > 1:
-            virado = resto[1]
+    x, virado, t, quadros = x0, False, 0, []
+    for seg, pose, destino, vir in roteiro:
+        destino = x if destino is None else destino
+        if vir is not None:
+            virado = vir
         elif destino != x:
             virado = destino < x
         quadros.append((100 * t / total, x, virado, pose))
@@ -437,18 +485,17 @@ def linha_do_tempo(roteiro):
     return total, quadros
 
 
-def animacao(n, roteiro, y, atraso):
+def animacao(n, x0, roteiro, y, atraso):
     """CSS da rotina do gato n: .mv anda, .vr vira o gato e .ps mostra uma pose por vez."""
-    total, quadros = linha_do_tempo(roteiro)
+    total, quadros = linha_do_tempo(x0, roteiro)
     poses = list(dict.fromkeys(q[3] for q in quadros if q[3]))
 
     def quadro(nome, valores):
-        fim = valores[0]
-        corpo = ' '.join(f'{pct:.2f}% {{ {v} }}' for pct, v in valores)
-        return f'  @keyframes {nome} {{ {corpo} 100% {{ {fim[1]} }} }}'
+        corpo = ' '.join(f'{pct:.3f}% {{ {v} }}' for pct, v in valores)
+        return f'  @keyframes {nome} {{ {corpo} 100% {{ {valores[0][1]} }} }}'
 
     css = [
-        f'  .mv{n}, .vr{n}, .ps{n} {{ animation-duration: {total}s; animation-iteration-count: infinite; '
+        f'  .mv{n}, .vr{n}, .ps{n} {{ animation-duration: {total:.1f}s; animation-iteration-count: infinite; '
         f'animation-delay: {atraso:.0f}s; animation-timing-function: step-end; }}',
         f'  .mv{n} {{ animation-name: mv{n}; animation-timing-function: linear; }}',
         f'  .vr{n} {{ animation-name: vr{n}; }}',
@@ -460,118 +507,55 @@ def animacao(n, roteiro, y, atraso):
         css.append(f'  .ps{n}.{pose} {{ animation-name: ps{n}{pose}; }}')
         css.append(quadro(f'ps{n}{pose}', [(pct, f'visibility: {"visible" if q == pose else "hidden"};')
                                            for pct, _, _, q in quadros]))
-    return poses, '\n'.join(css)
+    return total, poses, '\n'.join(css)
 
 
-def pose_rotina(pose, uid, p, tema, s):
-    """Uma pose com os pés em (0, 0), olhando para a direita. Devolve (svg, y do nome)."""
+def pose_rotina(pose, uid, p, tema, s, alto):
+    """Uma pose com os pés em (0, 0), olhando para a direita. Devolve (svg, y do nome).
+    alto: quanto o gato anda abaixo da linha do chão; quem entra na casinha ou deita na
+    almofada sobe até ela."""
     if pose == 'dentro':  # só o rabo para fora da porta da casinha
-        return rabo('M-4 -8 C -26 -4, -44 -12, -48 -30', p, 7, 'tail slow') + zzz(30, -70, False, tema), -204
-    if pose == 'correndo':
-        svg, largura, _, y_nome = corrida(uid, p, tema, s * 0.85)
-        return f'<g transform="translate({largura / 2:.1f} -76) scale(-1 1)">{svg}</g>', y_nome - 76
+        rabinho = rabo('M-4 -8 C -26 -4, -44 -12, -48 -30', p, 7, 'tail slow') + zzz(30, -70, False, tema)
+        return f'<g transform="translate(0 {-alto})">{rabinho}</g>', -204 - alto
+    extra, chao = '', 0
     if pose == 'soneca':
         svg, larg, chao_pose, hx, topo = dormindo(uid, p)
-        extra = (zzz((hx - larg / 2 + 34) * s, (topo - chao_pose) * s + 10, False, tema) +
-                 f'<g transform="translate({larg * s / 2 + 8:.1f} -76)">{novelo(tema, girando=False)}</g>')
+        chao = -ALMOFADA - alto
+        extra = zzz((hx - larg / 2 + 34) * s, (topo - chao_pose) * s + 10 + chao, False, tema)
+    elif pose in ('andando', 'comendo', 'correndo'):
+        svg, larg, chao_pose, hx, topo = andando(uid, p, comendo=pose == 'comendo')
+        if pose == 'correndo':
+            svg = f'<g class="run">{svg}</g>'
     else:
-        extra = ''
-        if pose in ('andando', 'comendo'):
-            svg, larg, chao_pose, hx, topo = andando(uid, p, comendo=pose == 'comendo')
-        else:
-            svg, larg, chao_pose, hx, topo = sentado(uid, p, lambendo=pose == 'lambendo',
-                                                     arranhando=pose == 'arranhando')
-    return (f'<g transform="translate({-larg * s / 2:.1f} {-chao_pose * s:.1f}) scale({s:.3f})">{svg}</g>'
-            + extra, (topo - chao_pose) * s - 8)
+        svg, larg, chao_pose, hx, topo = sentado(uid, p, lambendo=pose == 'lambendo',
+                                                 arranhando=pose == 'arranhando',
+                                                 brincando=pose == 'brincando')
+    return (f'<g transform="translate({-larg * s / 2:.1f} {chao - chao_pose * s:.1f}) scale({s:.3f})">{svg}</g>'
+            + extra, (topo - chao_pose) * s - 8 + chao)
 
 
 def cena(gatos, mostrar_nomes, tema, objetos=()):
-    estilos, fundo, frente = [CSS], [], []
-    andantes = [g for g in gatos if g['faz'] == 'andando']
-    brincantes = [g for g in gatos if g['faz'] == 'brincando']
-    parados = [g for g in gatos if g['faz'] in ('dormindo', 'sentado', 'lambendo')]
-    rotineiros = [g for g in gatos if g['faz'] in ROTINAS]
+    estilos, frente = [CSS], []
+    usados = {o for g in gatos for o in objetos_do(g['faz'])} | set(objetos)
+    fundo = [objeto(nome, tema) for nome in OBJETOS if nome in usados]
 
-    for i, g in enumerate(parados):
-        uid = f'g{g["n"]}'
-        p = paleta(g['raca'], g['cores'], tema)
-        x, chao = g['posicao'] or LUGARES[i % len(LUGARES)]
-        s = max(0.9, perspectiva(chao)) * g['tamanho']
-        virado = i % 2 == 1
-        if g['faz'] == 'dormindo':
-            svg, larg, chao_pose, hx, topo = dormindo(uid, p)
-        else:
-            svg, larg, chao_pose, hx, topo = sentado(uid, p, lambendo=g['faz'] == 'lambendo')
-        hx_tela = x + (larg - hx if virado else hx) * s
-        topo_tela = chao + (topo - chao_pose) * s
-        partes = [colocar(svg, larg, chao_pose, x, chao, s, virado)]
-        if g['faz'] == 'dormindo':
-            partes.append(zzz(hx_tela + (-1 if virado else 1) * 34 * s, topo_tela + 10, virado, tema))
-        if mostrar_nomes and g['nome']:
-            partes.append(rotulo(g['nome'], hx_tela, topo_tela - 8, tema))
-        fundo.append(''.join(partes))
-
-    usados = {o for g in rotineiros for o in ROTINAS[g['faz']]} | set(objetos)
-    fundo += [objeto(nome, tema) for nome in OBJETOS if nome in usados]
-
-    for i, g in enumerate(andantes):
-        uid = f'g{g["n"]}'
-        p = paleta(g['raca'], g['cores'], tema)
-        faixa = g['posicao'][1] if g['posicao'] else FAIXAS_ANDAR[i % len(FAIXAS_ANDAR)]
-        s = perspectiva(faixa) * g['tamanho']
-        svg, larg, chao_pose, hx, topo = andando(uid, p)
-        esquerda = i % 2 == 1
-        dur = DURACOES[i % len(DURACOES)] / max(g['tamanho'], 0.4) ** 0.5
-        atraso = -round(dur * ((0.35 + i * 0.29) % 1))
-        de, ate = (1700, -100 - larg * s) if esquerda else (-100 - larg * s, 1700)
-        estilos.append(f'  .andar{g["n"]} {{ animation: andar{g["n"]} {dur:.0f}s linear infinite; '
-                       f'animation-delay: {atraso}s; }}\n'
-                       f'  @keyframes andar{g["n"]} {{ from {{ transform: translate({de:.0f}px, 0); }} '
-                       f'to {{ transform: translate({ate:.0f}px, 0); }} }}')
-        hx_rel = (larg - hx if esquerda else hx) * s
-        partes = [colocar(svg, larg, chao_pose, 0, faixa, s, esquerda)]
-        if mostrar_nomes and g['nome']:
-            partes.append(rotulo(g['nome'], hx_rel, faixa + (topo - chao_pose) * s - 8, tema))
-        frente.append(f'<g class="andar{g["n"]}">{"".join(partes)}</g>')
-
-    for i, g in enumerate(brincantes):
-        p = paleta(g['raca'], g['cores'], tema)
-        faixa = g['posicao'][1] if g['posicao'] else FAIXAS_BRINCAR[i % len(FAIXAS_BRINCAR)]
-        cena_, largura, hx_rel, y_nome = corrida(f'g{g["n"]}', p, tema,
-                                                 perspectiva(faixa) * 0.85 * g['tamanho'])
-        direita = i % 2 == 1
-        if direita:
-            cena_, hx_rel = f'<g transform="scale(-1 1)">{cena_}</g>', -hx_rel
-        dur = 29 + 7 * i
-        atraso = -((9 + i * 13) % dur)
-        de, ate = (-100, 1700 + largura) if direita else (1700, -100 - largura)
-        estilos.append(f'  .brincar{g["n"]} {{ animation: brincar{g["n"]} {dur}s linear infinite; '
-                       f'animation-delay: {atraso}s; }}\n'
-                       f'  @keyframes brincar{g["n"]} {{ from {{ transform: translate({de:.0f}px, {faixa - 76}px); }} '
-                       f'to {{ transform: translate({ate:.0f}px, {faixa - 76}px); }} }}')
-        partes = [cena_]
-        if mostrar_nomes and g['nome']:
-            partes.append(rotulo(g['nome'], hx_rel, y_nome, tema))
-        frente.append(f'<g class="brincar{g["n"]}">{"".join(partes)}</g>')
-
-    for i, g in enumerate(rotineiros):
+    for i, g in enumerate(gatos):
         n = g['n']
         p = paleta(g['raca'], g['cores'], tema)
-        # quem brinca corre na frente do cenário; os outros andam na linha dos objetos
-        y = (800 if g['faz'] == 'brincalhao' else CHAO + 6) + 12 * i
+        rng = random.Random(f'{n}|{g["nome"]}|{g["raca"]}|{g["faz"]}')
+        y = CHAO + 6 + 5 * (i % 6)  # cada gato um pouco mais para a frente
         s = g['tamanho']
-        roteiro = passos(g['faz'], s)
-        total = sum(passo[0] for passo in roteiro)
-        poses, css = animacao(n, roteiro, y, -round(total * ((i * 0.37) % 1)))
+        x0, roteiro = passos(g, rng)
+        total, poses, css = animacao(n, x0, roteiro, y, -total_atraso(rng, roteiro))
         estilos.append(css)
         partes = []
         for pose in poses:
-            svg, y_nome = pose_rotina(pose, f'g{n}{pose}', p, tema, s)
+            svg, y_nome = pose_rotina(pose, f'g{n}{pose}', p, tema, s, y - CHAO)
             nome = rotulo(g['nome'], 0, y_nome, tema) if mostrar_nomes and g['nome'] else ''
             partes.append(f'<g class="ps{n} {pose}"><g class="vr{n}">{svg}</g>{nome}</g>')
         frente.append(f'<g class="mv{n}">{"".join(partes)}</g>')
 
-    return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
 <style>
 {chr(10).join(estilos)}
 </style>
@@ -580,7 +564,12 @@ def cena(gatos, mostrar_nomes, tema, objetos=()):
 {chr(10).join(frente)}
 </g>
 </svg>
-'''
+"""
+
+
+def total_atraso(rng, roteiro):
+    """Começa cada gato num ponto diferente da rotina."""
+    return round(sum(passo[0] for passo in roteiro) * rng.random())
 
 
 # --- Configuração ------------------------------------------------------------------------
@@ -625,12 +614,9 @@ def ler_gato(n, g):
     if not isinstance(tamanho, (int, float)) or isinstance(tamanho, bool) or not 0.3 <= tamanho <= 2:
         raise ErroConfig(f'{quem}: "tamanho" precisa ser um número de 0.3 a 2 (1 é o normal, 0.6 um filhote)')
 
-    posicao = g.get('posicao')
-    if posicao is not None:
-        if (not isinstance(posicao, list) or len(posicao) != 2
-                or not all(isinstance(v, (int, float)) and not isinstance(v, bool) for v in posicao)):
-            raise ErroConfig(f'{quem}: "posicao" precisa ser [x, y], com x de 0 a 1600 e y de 0 a 900')
-        posicao = tuple(posicao)
+    if 'posicao' in g:
+        print(f'gatinhos: aviso: {quem}: "posicao" não é mais usada, os gatos andam pelo cenário.',
+              file=sys.stderr)
 
     cores = g.get('cores', {})
     if not isinstance(cores, dict):
@@ -646,8 +632,7 @@ def ler_gato(n, g):
             if not isinstance(c, str) or not (HEX.match(c) or c in ('preto', 'branco')):
                 raise ErroConfig(f'{quem}: a cor "{chave}" precisa ser como "#f2a65a" (ou "preto"/"branco")')
         finais[CORES[chave]] = valor
-    return dict(n=n, nome=nome.strip(), raca=raca, faz=faz, tamanho=float(tamanho),
-                posicao=posicao, cores=finais)
+    return dict(n=n, nome=nome.strip(), raca=raca, faz=faz, tamanho=float(tamanho), cores=finais)
 
 
 def curto(caminho):
@@ -677,7 +662,7 @@ def configurar():
                 f'{curto(destino)} já existe. Substituir? (s/n)', 'n')) not in ('s', 'sim'):
             sys.exit('gatinhos: nada mudou.')
         print('Raças:', ', '.join(RACAS))
-        print('O que fazem:')
+        print('Do que cada um mais gosta:')
         for faz, descricao in ATIVIDADES.items():
             print(f'  {faz:<11} {descricao}')
         print('Deixe o nome vazio para terminar.\n')
@@ -687,7 +672,7 @@ def configurar():
             if not nome:
                 break
             raca = escolher('  raça', RACAS, APELIDOS_RACA, 'laranja')
-            faz = escolher('  faz', ATIVIDADES, APELIDOS_ATIVIDADE, 'andando')
+            faz = escolher('  gosta de', ATIVIDADES, APELIDOS_ATIVIDADE, 'andando')
             while True:
                 try:
                     tamanho = float(perguntar('  tamanho (0.3 a 2)', '1').replace(',', '.'))
@@ -731,8 +716,7 @@ def main():
         with open(os.path.join(saida, arquivo), 'w', encoding='utf-8') as f:
             f.write(cena(gatos, nomes, TEMAS[nome_tema], objetos))
     print(f'gatinhos: {len(gatos)} gato(s) de {curto(config)} → {curto(saida)}/')
-    animados = sum(g['faz'] not in ('dormindo', 'sentado', 'lambendo') for g in gatos)
-    if len(gatos) > 10 or animados > 6:
+    if len(gatos) > 6:
         print('gatinhos: aviso: muitos gatos deixam o fundo mais pesado para a CPU.')
 
 

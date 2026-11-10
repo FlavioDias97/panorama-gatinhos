@@ -21,7 +21,7 @@ Install it by cloning this repository into Panorama's plugins folder as `gatinho
 | Fonte (interface) | **Fredoka**, redonda e fofa |
 | Linguagem nova | **MiauScript** (`.miau`), com gramática própria em `syntaxes/` |
 | Extensão associada | `.conf` colorido como **INI** (pense no `kitty.conf`) |
-| Fundo animado | os **seus** gatos atrás dos terminais: raça, nome e o que cada um faz (andando, brincando, dormindo, sentado, se lambendo ou uma rotina com casinha, pote e arranhador) |
+| Fundo animado | os **seus** gatos atrás dos terminais, com raça e nome, comendo, brincando com o novelo, afiando as unhas, cochilando na almofada e passeando pela tela |
 
 Os temas mudam as cores do app, do código e as 16 cores ANSI do terminal, deixam os
 terminais um pouco transparentes e sem desfoque, para os gatinhos aparecerem atrás.
@@ -109,7 +109,7 @@ cd ~/.config/panorama/plugins/gatinhos
 python3 fundo/gerar.py --configurar
 ```
 
-Ele pergunta nome, raça, o que faz e tamanho de cada gato, grava o `gatos.json` e gera o
+Ele pergunta nome, raça, do que gosta e tamanho de cada gato, grava o `gatos.json` e gera o
 fundo. Para editar à mão, copie o exemplo, mude o que quiser e gere de novo:
 
 ```sh
@@ -135,9 +135,8 @@ Cada gato tem:
 | --- | --- |
 | `nome` | aparece em cima do gato; `"nomes": false` esconde todos |
 | `raca` | `siames`, `frajola`, `preto`, `branco`, `cinza`, `laranja`, `rajado`, `tricolor` ou `escaminha` (acento não importa) |
-| `faz` | `andando`, `brincando` (correndo atrás do novelo), `dormindo`, `sentado`, `lambendo`, ou uma das rotinas abaixo |
+| `faz` | do que o gato mais gosta, veja abaixo |
 | `tamanho` | opcional, de `0.3` a `2`; `1` é o normal, `0.6` um filhote |
-| `posicao` | opcional, `[x, y]` dos pés numa tela de 1600 × 900; quem anda ou brinca usa só o `y`, e as rotinas não usam |
 | `cores` | opcional, troca a cor de uma parte, como `{ "olhos": "#5fa8ff", "patas": "branco" }` |
 
 As partes que `cores` aceita: `pelo`, `listras`, `manchas` (uma lista), `barriga`,
@@ -146,30 +145,28 @@ As partes que `cores` aceita: `pelo`, `listras`, `manchas` (uma lista), `barriga
 gato não sumir no fundo. Gatos que ficariam pouco visíveis num dos temas ganham um
 contorno nele.
 
-### Rotinas
+### O que eles fazem
 
-Em vez de fazer uma coisa só, um gato pode seguir uma rotina, que se repete sem parar e usa
-objetos no chão do cenário:
+Todo gato faz de tudo um pouco: anda até o pote e come, afia as unhas no arranhador, dá
+tapinhas no novelo, cochila na almofada, se lambe, senta para olhar, sai da tela e volta
+pelo outro lado. Cada um segue uma ordem só dele, e `faz` diz do que ele mais gosta:
 
-| `faz` | O que o gato faz | Objetos |
-| --- | --- | --- |
-| `caseiro` | dorme dentro da casinha (só o rabo fica de fora), sai para comer, se lambe e volta | casinha e pote |
-| `explorador` | passeia, afia as unhas no arranhador, come, senta um pouco e sai da tela | arranhador e pote |
-| `brincalhao` | corre atrás do novelo, tira uma soneca junto dele e corre de novo | nenhum |
+| `faz` | O gato |
+| --- | --- |
+| `andando` | vive passeando, sai e volta pela tela |
+| `brincando` | vive brincando com o novelo e dando corridinhas |
+| `dormindo` | cochila muito na almofada |
+| `sentado` | senta e fica olhando |
+| `lambendo` | se lambe o tempo todo |
+| `caseiro` | dorme dentro da casinha (só o rabo fica de fora) e sai para comer |
 
-Cada objeto aparece uma vez só, mesmo que vários gatos o usem. Para pôr um objeto no
-cenário sem nenhum gato que o use, liste-o em `"objetos"`:
-
-```json
-{
-  "objetos": ["casinha", "arranhador"],
-  "gatos": [{ "nome": "Mingau", "raca": "siames", "faz": "caseiro" }]
-}
-```
+Os objetos ficam parados no chão do cenário: arranhador, novelo, pote, almofada e, se
+algum gato for `caseiro`, a casinha. Para pôr a casinha mesmo sem um gato caseiro, liste-a
+em `"objetos"`, como em `"objetos": ["casinha"]`.
 
 Se algo estiver errado, o `gerar.py` diz qual gato e o que usar no lugar, e não mexe no
-fundo. Cada gato andando, brincando ou numa rotina é mais uma animação para desenhar: com mais de uns
-6 o fundo pesa mais na CPU (o `gerar.py` avisa).
+fundo. Cada gato é mais uma animação para desenhar: com mais de 6 o fundo pesa mais na CPU (o
+`gerar.py` avisa).
 
 ## Atualizar e remover
 
