@@ -1,0 +1,11 @@
+{
+  "nomes": true,
+  "gatos": [
+    { "nome": "Mingau", "raca": "siames", "faz": "dormindo" },
+    { "nome": "Frajola", "raca": "frajola", "faz": "andando" },
+    { "nome": "Paçoca", "raca": "laranja", "faz": "brincando", "tamanho": 0.7 },
+    { "nome": "Pretinha", "raca": "preto", "faz": "andando" },
+    { "nome": "Nuvem", "raca": "branco", "faz": "sentado" },
+    { "nome": "Pipoca", "raca": "tricolor", "faz": "lambendo" }
+  ]
+}

@@ -21,7 +21,7 @@ Install it by cloning this repository into Panorama's plugins folder as `gatinho
 | Fonte (interface) | **Fredoka**, redonda e fofa |
 | Linguagem nova | **MiauScript** (`.miau`), com gramática própria em `syntaxes/` |
 | Extensão associada | `.conf` colorido como **INI** (pense no `kitty.conf`) |
-| Fundo animado | gatinhos andando, um filhote correndo atrás do novelo e um gato dormindo, atrás dos terminais |
+| Fundo animado | os **seus** gatos atrás dos terminais: raça, nome e o que cada um faz (andando, brincando, dormindo, sentado, se lambendo ou uma rotina com casinha, pote e arranhador) |
 
 Os temas mudam as cores do app, do código e as 16 cores ANSI do terminal, deixam os
 terminais um pouco transparentes e sem desfoque, para os gatinhos aparecerem atrás.
@@ -98,12 +98,89 @@ Em **Settings → Appearance**:
 Abra `exemplos/gato.miau` e `exemplos/kitty.conf` no editor do Panorama para ver as
 linguagens.
 
+## Seus gatos
+
+Os gatos do fundo vêm de um arquivo `gatos.json` na pasta do plugin. O jeito mais fácil
+de criar o seu é responder às perguntas do `gerar.py` (precisa de Python 3, sem instalar
+nada):
+
+```sh
+cd ~/.config/panorama/plugins/gatinhos
+python3 fundo/gerar.py --configurar
+```
+
+Ele pergunta nome, raça, o que faz e tamanho de cada gato, grava o `gatos.json` e gera o
+fundo. Para editar à mão, copie o exemplo, mude o que quiser e gere de novo:
+
+```sh
+cp gatos.exemplo.json gatos.json
+python3 fundo/gerar.py
+```
+
+O Panorama troca o fundo na hora. Um `gatos.json` com dois gatos:
+
+```json
+{
+  "nomes": true,
+  "gatos": [
+    { "nome": "Mingau", "raca": "siames", "faz": "dormindo" },
+    { "nome": "Frajola", "raca": "frajola", "faz": "brincando", "tamanho": 0.7 }
+  ]
+}
+```
+
+Cada gato tem:
+
+| Campo | O quê |
+| --- | --- |
+| `nome` | aparece em cima do gato; `"nomes": false` esconde todos |
+| `raca` | `siames`, `frajola`, `preto`, `branco`, `cinza`, `laranja`, `rajado`, `tricolor` ou `escaminha` (acento não importa) |
+| `faz` | `andando`, `brincando` (correndo atrás do novelo), `dormindo`, `sentado`, `lambendo`, ou uma das rotinas abaixo |
+| `tamanho` | opcional, de `0.3` a `2`; `1` é o normal, `0.6` um filhote |
+| `posicao` | opcional, `[x, y]` dos pés numa tela de 1600 × 900; quem anda ou brinca usa só o `y`, e as rotinas não usam |
+| `cores` | opcional, troca a cor de uma parte, como `{ "olhos": "#5fa8ff", "patas": "branco" }` |
+
+As partes que `cores` aceita: `pelo`, `listras`, `manchas` (uma lista), `barriga`,
+`pernas`, `patas`, `rabo`, `orelhas`, `orelhaDentro`, `rosto`, `focinho`, `olhos` e
+`nariz`. Uma cor é `"#rrggbb"`, ou `"preto"`/`"branco"`, que se ajustam ao tema para o
+gato não sumir no fundo. Gatos que ficariam pouco visíveis num dos temas ganham um
+contorno nele.
+
+### Rotinas
+
+Em vez de fazer uma coisa só, um gato pode seguir uma rotina, que se repete sem parar e usa
+objetos no chão do cenário:
+
+| `faz` | O que o gato faz | Objetos |
+| --- | --- | --- |
+| `caseiro` | dorme dentro da casinha (só o rabo fica de fora), sai para comer, se lambe e volta | casinha e pote |
+| `explorador` | passeia, afia as unhas no arranhador, come, senta um pouco e sai da tela | arranhador e pote |
+| `brincalhao` | corre atrás do novelo, tira uma soneca junto dele e corre de novo | nenhum |
+
+Cada objeto aparece uma vez só, mesmo que vários gatos o usem. Para pôr um objeto no
+cenário sem nenhum gato que o use, liste-o em `"objetos"`:
+
+```json
+{
+  "objetos": ["casinha", "arranhador"],
+  "gatos": [{ "nome": "Mingau", "raca": "siames", "faz": "caseiro" }]
+}
+```
+
+Se algo estiver errado, o `gerar.py` diz qual gato e o que usar no lugar, e não mexe no
+fundo. Cada gato andando, brincando ou numa rotina é mais uma animação para desenhar: com mais de uns
+6 o fundo pesa mais na CPU (o `gerar.py` avisa).
+
 ## Atualizar e remover
 
 ```sh
-git -C ~/.config/panorama/plugins/gatinhos pull   # atualizar
-rm -rf ~/.config/panorama/plugins/gatinhos        # remover
+cd ~/.config/panorama/plugins/gatinhos
+git checkout -- fundo/*.svg && git pull && python3 fundo/gerar.py   # atualizar
+rm -rf ~/.config/panorama/plugins/gatinhos                          # remover
 ```
+
+O `gatos.json` é seu e o `git pull` não mexe nele. Os SVGs do fundo são gerados a partir
+dele, por isso o `checkout` antes do `pull` e o `gerar.py` depois.
 
 Para só desligar sem remover, use o interruptor em **Settings → Plugins**; o Panorama
 volta para o próprio tema e as próprias fontes.
@@ -125,6 +202,7 @@ gatinhos/
 ├── plugin.json                         manifesto: temas, fontes e linguagens
 ├── fonts/                              Comic Mono e Fredoka, com as licenças
 ├── syntaxes/miauscript.tmLanguage.json gramática TextMate do MiauScript
+├── gatos.exemplo.json                  os gatos do fundo (copie para gatos.json)
 ├── fundo/                              os gatinhos animados (SVG) e o gerar.py que os cria
 ├── prints/                             as imagens deste README
 └── exemplos/                           gato.miau e kitty.conf
